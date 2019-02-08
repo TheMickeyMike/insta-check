@@ -3,32 +3,40 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/TheMickeyMike/insta-check/pkg/client"
+	"github.com/TheMickeyMike/insta-check/pkg/executor"
 	"github.com/TheMickeyMike/insta-check/pkg/service"
 )
 
 // App is backbone for application
 type App struct {
-	instagram *service.Instagram
+	executor *executor.Executor
 }
 
 // Initialize setup app
 func (app *App) Initialize() {
-	fmt.Printf("%-13s: %s\n", "App name", version)
-	fmt.Printf("%-13s: %s\n", "App version", name)
+	fmt.Printf("%-13s: %s\n", "App name", name)
+	fmt.Printf("%-13s: %s\n", "App version", version)
 
 	httpClient := client.NewTrickyHTTP()
-	app.instagram = service.NewInstagram(httpClient)
+	instagramService := service.NewInstagram(httpClient)
+	app.executor = executor.NewExecutor(2, 10, instagramService)
 }
 
 // Run 3 2 1.. Let's go
 func (app *App) Run() {
-	fmt.Println("Let's Go! 🚀")
-	username := "maciej"
-	result, err := app.instagram.UsernameIsAvailable(username)
-	if err != nil {
-		log.Fatal(err)
+	fmt.Printf("\nLet's Go! 🚀\n\n")
+
+	usernames := []string{"maciej", "domi", "hdasjfb"}
+	progress := len(usernames)
+	for result := range app.executor.RunTask(usernames) {
+		log.Printf("Result: %s", result)
+		progress--
+		if progress == 0 {
+			break
+		}
 	}
-	log.Printf("Username: %-18s Available: %t\n", username, result)
+	os.Exit(0)
 }
