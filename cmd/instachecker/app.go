@@ -6,12 +6,14 @@ import (
 	"os"
 
 	"github.com/TheMickeyMike/insta-check/pkg/client"
+	"github.com/TheMickeyMike/insta-check/pkg/config"
 	"github.com/TheMickeyMike/insta-check/pkg/executor"
 	"github.com/TheMickeyMike/insta-check/pkg/service"
 )
 
 // App is backbone for application
 type App struct {
+	config   *config.AppConfig
 	executor *executor.Executor
 }
 
@@ -19,9 +21,10 @@ type App struct {
 func (app *App) Initialize() {
 	fmt.Printf("%-13s: %s\n", "App name", name)
 	fmt.Printf("%-13s: %s\n", "App version", version)
+	app.config = config.LoadConfig()
 
 	httpClient := client.NewTrickyHTTP()
-	instagramService := service.NewInstagram(httpClient)
+	instagramService := service.NewInstagram(app.config.Instagram, httpClient)
 	app.executor = executor.NewExecutor(2, 10, instagramService)
 }
 

@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"github.com/TheMickeyMike/insta-check/pkg/config"
 	"bytes"
 	"io/ioutil"
 	"net/http"
@@ -13,7 +14,6 @@ import (
 )
 
 const testUsername = "some_username"
-const testURL = "https://www.instagram.com/accounts/web_create_ajax/attempt/"
 const responseWithNotValidUsername = `
 {
     "errors": {
@@ -33,6 +33,7 @@ const responseWithValidUsername = `
 }`
 
 func TestUsernameIsAvailableReturnsFalseIfInstgramResturnValidationError(t *testing.T) {
+	instaConfig := &config.InstagramConfig{URL: "http://example.com/some/path"}
 	form := service.NewRegistrationForm(testUsername)
 
 	response := &http.Response{
@@ -43,15 +44,16 @@ func TestUsernameIsAvailableReturnsFalseIfInstgramResturnValidationError(t *test
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	httpClientMock := mocks.NewMockHttpClient(mockCtrl)
-	httpClientMock.EXPECT().PostForm(testURL, form).Return(response, nil)
+	httpClientMock.EXPECT().PostForm(instaConfig.URL, form).Return(response, nil)
 
-	instagram := service.NewInstagram(httpClientMock)
+	instagram := service.NewInstagram(instaConfig,httpClientMock)
 	result, err := instagram.UsernameIsAvailable(testUsername)
 	assert.NoError(t, err)
 	assert.False(t, result)
 }
 
 func TestUsernameIsAvailableReturnsTrue(t *testing.T) {
+	instaConfig := &config.InstagramConfig{URL: "http://example.com/some/path"}
 	form := service.NewRegistrationForm(testUsername)
 
 	response := &http.Response{
@@ -62,9 +64,9 @@ func TestUsernameIsAvailableReturnsTrue(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	httpClientMock := mocks.NewMockHttpClient(mockCtrl)
-	httpClientMock.EXPECT().PostForm(testURL, form).Return(response, nil)
+	httpClientMock.EXPECT().PostForm(instaConfig.URL, form).Return(response, nil)
 
-	instagram := service.NewInstagram(httpClientMock)
+	instagram := service.NewInstagram(instaConfig,httpClientMock)
 	result, err := instagram.UsernameIsAvailable(testUsername)
 	assert.NoError(t, err)
 	assert.True(t, result)

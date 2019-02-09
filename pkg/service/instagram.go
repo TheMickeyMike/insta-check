@@ -6,22 +6,23 @@ import (
 	"net/http"
 
 	"github.com/TheMickeyMike/insta-check/pkg/client"
+	"github.com/TheMickeyMike/insta-check/pkg/config"
 )
 
-const registerAjaxURL = "https://www.instagram.com/accounts/web_create_ajax/attempt/"
-
 type Instagram struct {
+	url    string
 	client client.HttpClient
 }
 
-func NewInstagram(httpClient client.HttpClient) *Instagram {
+func NewInstagram(config *config.InstagramConfig, httpClient client.HttpClient) *Instagram {
 	return &Instagram{
+		url:    config.URL,
 		client: httpClient,
 	}
 }
 
 func (i *Instagram) UsernameIsAvailable(username string) (bool, error) {
-	resp, err := i.client.PostForm(registerAjaxURL, NewRegistrationForm(username))
+	resp, err := i.client.PostForm(i.url, NewRegistrationForm(username))
 	if err != nil {
 		return false, fmt.Errorf("Can't post form data, error: %v", err)
 	}
