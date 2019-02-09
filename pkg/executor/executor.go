@@ -9,9 +9,9 @@ type Executor struct {
 	resultsQueue   <-chan *result
 }
 
-func NewExecutor(workersCount, concurrentlyCount int, instagramService *service.Instagram) *Executor {
-	usernamesQueue := make(chan string, concurrentlyCount)
-	resultsQueue := make(chan *result, workersCount*concurrentlyCount)
+func NewExecutor(workersCount, concurrent int, instagramService *service.Instagram) *Executor {
+	usernamesQueue := make(chan string, concurrent)
+	resultsQueue := make(chan *result, workersCount*concurrent)
 
 	executor := &Executor{usernamesQueue, resultsQueue}
 
@@ -22,9 +22,11 @@ func NewExecutor(workersCount, concurrentlyCount int, instagramService *service.
 }
 
 func (executor *Executor) RunTask(usernamesToCheck []string) <-chan *result {
-	for _, username := range usernamesToCheck {
-		executor.usernamesQueue <- username
-	}
-	close(executor.usernamesQueue)
+	go func() {
+		for _, username := range usernamesToCheck {
+			executor.usernamesQueue <- username
+		}
+		close(executor.usernamesQueue)
+	}()
 	return executor.resultsQueue
 }

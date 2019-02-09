@@ -25,7 +25,7 @@ func (app *App) Initialize() {
 
 	httpClient := client.NewTrickyHTTP()
 	instagramService := service.NewInstagram(app.config.Instagram, httpClient)
-	app.executor = executor.NewExecutor(2, 10, instagramService)
+	app.executor = executor.NewExecutor(3, 3, instagramService)
 }
 
 // Run 3 2 1.. Let's go
@@ -33,13 +33,12 @@ func (app *App) Run() {
 	fmt.Printf("\nLet's Go! 🚀\n\n")
 
 	usernames := []string{"maciej", "domi", "hdasjfb"}
-	progress := len(usernames)
-	for result := range app.executor.RunTask(usernames) {
+	resultCh := app.executor.RunTask(usernames)
+	// Read result for every username from buffered channel
+	for range usernames {
+		result := <-resultCh
 		log.Printf("Result: %s", result)
-		progress--
-		if progress == 0 {
-			break
-		}
 	}
+
 	os.Exit(0)
 }
