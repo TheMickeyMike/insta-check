@@ -1,6 +1,8 @@
 package executor
 
 import (
+	"sync"
+
 	"github.com/TheMickeyMike/insta-check/pkg/service"
 )
 
@@ -13,11 +15,21 @@ func NewExecutor(workersCount, concurrent int, instagramService *service.Instagr
 	usernamesQueue := make(chan string, concurrent)
 	resultsQueue := make(chan *result, workersCount*concurrent)
 
+	var wg sync.WaitGroup
+	wg.Add(workersCount)
+
 	executor := &Executor{usernamesQueue, resultsQueue}
 
 	for id := 1; id <= workersCount; id++ {
-		go NewWorker(id, usernamesQueue, resultsQueue).Run(instagramService)
+		go func(id int) {
+			NewWorker(id, usernamesQueue, resultsQueue).Run(instagramService)
+			wg.Done()
+		}(id)
 	}
+	go func() {
+		wg.Wait()
+		close(resultsQueue)
+	}()
 	return executor
 }
 

@@ -29,7 +29,6 @@ func NewWorker(id int, usernamesQueue <-chan string, resultsQueue chan<- *result
 func (worker *worker) Run(instagramService *service.Instagram) {
 	var r result
 	for username := range worker.usernamesQueue {
-		r = result{}
 		r.username = username
 		r.available, r.err = instagramService.UsernameIsAvailable(username)
 		worker.resultsQueue <- &r

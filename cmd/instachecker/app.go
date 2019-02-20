@@ -33,10 +33,7 @@ func (app *App) Run() {
 	fmt.Printf("\nLet's Go! 🚀\n\n")
 
 	usernames := []string{"maciej", "domi", "hdasjfb"}
-	resultCh := app.executor.RunTask(usernames)
-	// Read result for every username from buffered channel
-	for range usernames {
-		result := <-resultCh
+	for result := range app.executor.RunTask(usernames) {
 		log.Printf("Result: %s", result)
 	}
 
