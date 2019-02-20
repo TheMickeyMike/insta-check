@@ -25,7 +25,7 @@ func (app *App) Initialize() {
 
 	httpClient := client.NewTrickyHTTP()
 	instagramService := service.NewInstagram(app.config.Instagram, httpClient)
-	app.executor = executor.NewExecutor(2, instagramService)
+	app.executor = executor.NewExecutor(4, instagramService)
 }
 
 // Run 3 2 1.. Let's go
