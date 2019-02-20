@@ -7,6 +7,11 @@ import (
 	"github.com/fatih/color"
 )
 
+var (
+	green = color.New(color.FgGreen).SprintFunc()
+	red   = color.New(color.FgRed).SprintFunc()
+)
+
 type result struct {
 	username  string
 	available bool
@@ -14,15 +19,12 @@ type result struct {
 }
 
 func (r result) String() string {
-	var username string
-	green := color.New(color.FgGreen).SprintFunc()
-	red := color.New(color.FgRed).SprintFunc()
 	if r.available {
-		username = green(r.username)
+		r.username = green(r.username)
 	} else {
-		username = red(r.username)
+		r.username = red(r.username)
 	}
-	return fmt.Sprintf("Username: %-18s Available: %-8t Error: %v", username, r.available, r.err)
+	return fmt.Sprintf("Username: %-18s Available: %-8t Error: %v", r.username, r.available, r.err)
 }
 
 type worker struct {
@@ -36,9 +38,8 @@ func NewWorker(id int, usernamesQueue <-chan string, resultsQueue chan<- *result
 }
 
 func (worker *worker) Run(instagramService *service.Instagram) {
-	var r result
 	for username := range worker.usernamesQueue {
-		r.username = username
+		r := result{username: username}
 		r.available, r.err = instagramService.UsernameIsAvailable(username)
 		worker.resultsQueue <- &r
 	}

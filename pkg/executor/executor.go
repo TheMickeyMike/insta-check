@@ -11,9 +11,9 @@ type Executor struct {
 	resultsQueue   <-chan *result
 }
 
-func NewExecutor(workersCount, concurrent int, instagramService *service.Instagram) *Executor {
-	usernamesQueue := make(chan string, concurrent)
-	resultsQueue := make(chan *result, workersCount*concurrent)
+func NewExecutor(workersCount int, instagramService *service.Instagram) *Executor {
+	usernamesQueue := make(chan string, workersCount)
+	resultsQueue := make(chan *result, workersCount)
 
 	var wg sync.WaitGroup
 	wg.Add(workersCount)

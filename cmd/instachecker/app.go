@@ -25,14 +25,14 @@ func (app *App) Initialize() {
 
 	httpClient := client.NewTrickyHTTP()
 	instagramService := service.NewInstagram(app.config.Instagram, httpClient)
-	app.executor = executor.NewExecutor(3, 3, instagramService)
+	app.executor = executor.NewExecutor(2, instagramService)
 }
 
 // Run 3 2 1.. Let's go
 func (app *App) Run() {
 	fmt.Printf("\nLet's Go! 🚀\n\n")
 
-	usernames := []string{"maciej", "domi", "hdasjfb"}
+	usernames := []string{"jack", "moly", "hdasjfb", "bdfsfhvs"}
 	for result := range app.executor.RunTask(usernames) {
 		log.Printf("Result: %s", result)
 	}
